@@ -297,19 +297,8 @@ Vous pouvez tester l’API directement via la documentation interactive ou en ut
 
 ---
 
-## 10. Contribuer
 
-Les contributions sont les bienvenues ! Pour contribuer :
-
-1. **Fork** ce dépôt.
-2. **Créez une branche** pour votre fonctionnalité (`git checkout -b feature/AmazingFeature`).
-3. **Committez** vos changements (`git commit -m 'Add some AmazingFeature'`).
-4. **Pushez** la branche (`git push origin feature/AmazingFeature`).
-5. **Ouvrez une Pull Request**.
-
----
-
-## 11. Licence
+## 10. Licence
 
 Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
 
