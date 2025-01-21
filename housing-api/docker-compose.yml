@@ -1,23 +1,30 @@
 # docker-compose.yml
 
+version: '3.8'
+
 services:
   db:
     image: postgres:13
     container_name: housing_db
     restart: always
-    env_file:
-      - .env
     environment:
-      POSTGRES_USER: ${DB_USER}
-      POSTGRES_PASSWORD: ${DB_PASSWORD}
-      POSTGRES_DB: ${DB_NAME}
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: housing
     ports:
-      - "${DB_PORT}:5432"
+      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   web:
-    build: .
+    build:
+      context: .
+      dockerfile: Dockerfile
     container_name: housing_api
     restart: always
     env_file:
@@ -25,7 +32,8 @@ services:
     ports:
       - "${API_PORT}:8001"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
     volumes:
       - .:/app
     command: >

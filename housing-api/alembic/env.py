@@ -1,46 +1,45 @@
+# alembic/env.py
+
+import os
 from logging.config import fileConfig
-from sqlalchemy import engine_from_config, pool
+from sqlalchemy import engine_from_config
+from sqlalchemy import pool
 from alembic import context
+from dotenv import load_dotenv
 
-# On importe Base et l'URL de connexion
-from app.database import Base, SQLALCHEMY_DATABASE_URL
-# Importer vos modèles pour qu'Alembic détecte les tables
-from app.models import House  # ou tout autre modèle
+# Charger les variables d'environnement
+load_dotenv()
 
-# Config Alembic
+# Importer les modèles
+from app.models import Base
+
 config = context.config
+
+# Configuration de la base de données via les variables d'environnement
+config.set_main_option(
+    "sqlalchemy.url",
+    f"postgresql+psycopg2://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
+)
+
 fileConfig(config.config_file_name)
-
-# On écrit l'URL dans la config Alembic
-config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
-
 target_metadata = Base.metadata
 
-
-
 def run_migrations_offline():
-    """Mode 'offline'"""
     url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"},
-    )
-
+    context.configure(url=url, target_metadata=target_metadata, literal_binds=True)
     with context.begin_transaction():
         context.run_migrations()
 
-
 def run_migrations_online():
-    """Mode 'online'"""
     connectable = engine_from_config(
-        config.get_section(config.config_ini_section), prefix="sqlalchemy.", poolclass=pool.NullPool
+        config.get_section(config.config_ini_section),
+        prefix="sqlalchemy.",
+        poolclass=pool.NullPool,
     )
-
     with connectable.connect() as connection:
         context.configure(connection=connection, target_metadata=target_metadata)
-
         with context.begin_transaction():
             context.run_migrations()
-
 
 if context.is_offline_mode():
     run_migrations_offline()
