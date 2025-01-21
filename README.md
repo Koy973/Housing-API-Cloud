@@ -14,9 +14,8 @@
 6. [Effectuer les Migrations](#6-effectuer-les-migrations)
 7. [Lancer l’Application](#7-lancer-lapplication)
 8. [Tester l’API](#8-tester-lapi)
-9. [Dépannage](#9-dépannage)
-10. [Contribuer](#10-contribuer)
-11. [Licence](#11-licence)
+9. [Dépannage](#9-utiliser-docker)
+10. [Licence](#11-licence)
 
 ---
 
@@ -274,28 +273,43 @@ Vous pouvez tester l’API directement via la documentation interactive ou en ut
     ```
 
 ---
+## 9. Utiliser Docker
 
-## 9. Dépannage
-
-- **Erreur de Connexion à la Base de Données** :
-    - Vérifiez les valeurs dans votre fichier `.env` (DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME).
-    - Assurez-vous que PostgreSQL est en cours d'exécution et que la base de données spécifiée existe.
-
-- **Problèmes de Migration Alembic** :
-    - Assurez-vous que `alembic/env.py` est correctement configuré pour charger `SQLALCHEMY_DATABASE_URL`.
-    - Vérifiez que vos modèles dans `app/models.py` sont correctement définis.
-
-- **Problèmes avec les Dépendances** :
-    - Assurez-vous d'avoir activé l'environnement virtuel Poetry (`poetry shell`).
-    - Réinstallez les dépendances si nécessaire :
+- **Construire et Lancer les Conteneurs Docker** :
+    - Assurez-vous d’avoir installé Docker et Docker Compose sur votre machine.
+    - Pour construire et lancer les conteneurs :
         ```bash
-        poetry install
+        docker-compose up --build
+        ```
+    - Pour lancer les conteneurs en arrière-plan (mode détaché) :
+        ```bash
+        docker-compose up -d
         ```
 
-- **Afficher les Requêtes SQL** :
-    - Vérifiez que `echo=True` est bien configuré dans `create_engine` dans `app/database.py` pour voir les requêtes SQL dans la console.
+- **Arrêter les Conteneurs Docker** :
+    - Pour arrêter et supprimer les conteneurs actifs :
+        ```bash
+        docker-compose down
+        ```
+
+- **Vérifier les Logs des Conteneurs Docker** :
+    - Pour suivre les logs du conteneur `web` :
+        ```bash
+        docker-compose logs -f web
+        ```
+    - Pour suivre les logs du conteneur de la base de données `db` :
+        ```bash
+        docker-compose logs -f db
+        ```
+
+- **Accéder à l'API via Docker** :
+    - Une fois les conteneurs lancés, accédez à la documentation interactive de l'API via :
+        ```
+        http://localhost:8000/docs
+        ```
 
 ---
+
 
 
 ## 10. Licence
