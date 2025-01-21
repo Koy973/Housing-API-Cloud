@@ -1,323 +1,205 @@
 # Housing API
 
-**Housing API** est une API développée en Python avec **FastAPI** qui permet de créer et de récupérer des enregistrements de maisons stockés dans une base de données **PostgreSQL**. Ce guide vous expliquera étape par étape comment installer, configurer et lancer le projet.
-
----
+**Housing API** est une API développée avec **FastAPI** et **PostgreSQL**, déployée facilement avec **Docker**. Elle permet de gérer des enregistrements de maisons. Ce guide vous explique comment cloner le projet, le lancer avec Docker et tester l'API avec des exemples d'utilisation.
 
 ## Table des Matières
 
-1. [Prérequis](#1-prérequis)
-2. [Cloner le Dépôt](#2-cloner-le-dépôt)
-3. [Configurer les Variables d’Environnement](#3-configurer-les-variables-denvironnement)
-4. [Installer les Dépendances](#4-installer-les-dépendances)
-5. [Configurer la Base de Données](#5-configurer-la-base-de-données)
-6. [Effectuer les Migrations](#6-effectuer-les-migrations)
-7. [Lancer l’Application](#7-lancer-lapplication)
-8. [Tester l’API](#8-tester-lapi)
-9. [Dépannage](#9-utiliser-docker)
-10. [Licence](#11-licence)
+1. [Cloner le Projet](#1-cloner-le-projet)
+2. [Lancer le Projet avec Docker](#2-lancer-le-projet-avec-docker)
+3. [Tester l'API avec cURL](#3-tester-lapi-avec-curl)
+4. [Notes Importantes](#4-notes-importantes)
+5. [Licence](#5-licence)
 
----
-
-## 1. Prérequis
-
-Avant de commencer, assurez-vous d'avoir les éléments suivants installés sur votre machine :
-
-- **Python 3.9+**
-- **Poetry** (gestionnaire de dépendances)
-- **PostgreSQL** (local ou distant)
-- **Git**
-- (Optionnel) **Docker** pour le déploiement conteneurisé
-
----
-
-## 2. Cloner le Dépôt
+## 1. Cloner le Projet
 
 1. **Cloner le dépôt GitHub** :
-    ```bash
-    git clone https://github.com/votre-utilisateur/housing-firstname-lastname.git
-    cd housing-firstname-lastname/housing-api
-    ```
+   ```bash
+   git clone https://github.com/votre-utilisateur/housing-firstname-lastname.git
+   cd housing-firstname-lastname/housing-api
+   ```
 
-2. **Naviguer dans le répertoire `housing-api`** :
-    ```bash
-    cd housing-api
-    ```
+2. **Vérifier que les fichiers nécessaires sont présents** :  
+   Assurez-vous que les fichiers suivants existent dans le projet :
+   - `docker-compose.yml`
+   - `Dockerfile`
+   - `app/` (le dossier contenant le code source)
+   - `pyproject.toml` et `poetry.lock`
 
----
+## 2. Lancer le Projet avec Docker
 
-## 3. Configurer les Variables d’Environnement
+1. **Construire et lancer les conteneurs** :
+   ```bash
+   docker-compose up --build
+   ```
+   
+   Cette commande :
+   - Construira les images Docker pour le projet
+   - Démarrera les services (API et base de données PostgreSQL)
 
-1. **Créer un fichier `.env`** à la racine du projet (`housing-api/`) :
-    ```bash
-    touch .env
-    ```
+2. **Accéder à l'API** :
+   - Une fois les conteneurs démarrés, l'API sera disponible sur [http://localhost:8001](http://localhost:8001)
+   - Vous pouvez accéder à la documentation interactive via [http://localhost:8001/docs](http://localhost:8001/docs)
 
-2. **Remplir le fichier `.env`** avec les variables suivantes :
-    ```ini
-    DB_HOST=localhost
-    DB_PORT=5432
-    DB_USER=ko
-    DB_PASSWORD=mypassword
-    DB_NAME=mydatabase_cloud_project
-    ```
+3. **Arrêter les conteneurs** :
+   ```bash
+   docker-compose down
+   ```
 
-    - **DB_HOST** : Adresse de votre serveur PostgreSQL (ex. `localhost`)
-    - **DB_PORT** : Port PostgreSQL (par défaut `5432`)
-    - **DB_USER** : Nom d'utilisateur PostgreSQL
-    - **DB_PASSWORD** : Mot de passe PostgreSQL
-    - **DB_NAME** : Nom de la base de données
+## 3. Tester l'API avec cURL
 
-3. **Ajouter `.env` au `.gitignore`** pour éviter de committer les informations sensibles :
-    ```bash
-    echo ".env" >> .gitignore
-    ```
+### 3.1. Récupérer Toutes les Maisons (`GET /houses`)
 
----
+Pour récupérer la liste des maisons :
+```bash
+curl -X GET http://localhost:8001/houses
+```
 
-## 4. Installer les Dépendances
+Réponse Attendue (Exemple) :
+```json
+[]
+```
 
-1. **Installer Poetry** (si ce n'est pas déjà fait) :
-    ```bash
-    curl -sSL https://install.python-poetry.org | python3 -
-    ```
+### 3.2. Créer une Nouvelle Maison (`POST /houses`)
 
-    - **Note** : Ajoutez Poetry à votre `PATH` si nécessaire. Suivez les instructions affichées après l'installation.
+Pour ajouter une nouvelle maison à l'API :
+```bash
+curl -X POST http://localhost:8001/houses \
+-H "Content-Type: application/json" \
+-d '{
+  "longitude": -122.23,
+  "latitude": 37.88,
+  "housing_median_age": 41,
+  "total_rooms": 880,
+  "total_bedrooms": 129,
+  "population": 322,
+  "households": 126,
+  "median_income": 8.3252,
+  "median_house_value": 452600.0,
+  "ocean_proximity": "NEAR BAY"
+}'
+```
 
-2. **Installer les dépendances du projet** :
-    ```bash
-    poetry install
-    ```
+Réponse Attendue (Exemple) :
+```json
+{
+  "id": 1,
+  "longitude": -122.23,
+  "latitude": 37.88,
+  "housing_median_age": 41,
+  "total_rooms": 880,
+  "total_bedrooms": 129,
+  "population": 322,
+  "households": 126,
+  "median_income": 8.3252,
+  "median_house_value": 452600.0,
+  "ocean_proximity": "NEAR BAY"
+}
+```
 
-3. **Activer l’environnement virtuel de Poetry** :
-    ```bash
-    poetry shell
-    ```
+### 3.3. Valider une Erreur (Exemple d'Entrée Invalide)
 
----
+Envoyez un POST avec des données manquantes :
+```bash
+curl -X POST http://localhost:8001/houses \
+-H "Content-Type: application/json" \
+-d '{
+  "longitude": -122.23
+}'
+```
 
-## 5. Configurer la Base de Données
-
-1. **Démarrer PostgreSQL** si ce n'est pas déjà fait.
-
-2. **Créer la base de données** :
-    - Connectez-vous à PostgreSQL :
-        ```bash
-        psql -U ko
-        ```
-    - Créez la base de données :
-        ```sql
-        CREATE DATABASE mydatabase_cloud_project;
-        \q
-        ```
-
-    - **Note** : Remplacez `ko` par votre nom d'utilisateur PostgreSQL si nécessaire.
-
----
-
-## 6. Effectuer les Migrations
-
-Le projet utilise **Alembic** pour gérer les migrations de la base de données.
-
-1. **Initialiser Alembic** *(si ce n’est pas déjà fait)* :
-    ```bash
-    alembic init alembic
-    ```
-
-2. **Configurer Alembic** :
-    - Ouvrez `alembic.ini` et assurez-vous que la ligne suivante utilise la variable d'environnement :
-        ```ini
-        sqlalchemy.url = env:SQLALCHEMY_DATABASE_URL
-        ```
-
-    - Modifiez `alembic/env.py` pour charger les modèles et la configuration :
-        ```python
-        # alembic/env.py
-
-        from logging.config import fileConfig
-        from sqlalchemy import engine_from_config
-        from sqlalchemy import pool
-        from alembic import context
-
-        import os
-        from dotenv import load_dotenv
-
-        # Charger les variables d'environnement
-        load_dotenv()
-
-        # Importer Base et les modèles
-        from app.database import Base, SQLALCHEMY_DATABASE_URL
-        from app import models
-
-        # Configuration Alembic
-        config = context.config
-        config.set_main_option("sqlalchemy.url", SQLALCHEMY_DATABASE_URL)
-        fileConfig(config.config_file_name)
-        target_metadata = Base.metadata
-
-        def run_migrations_offline():
-            url = config.get_main_option("sqlalchemy.url")
-            context.configure(
-                url=url, target_metadata=target_metadata, literal_binds=True, dialect_opts={"paramstyle": "named"},
-            )
-            with context.begin_transaction():
-                context.run_migrations()
-
-        def run_migrations_online():
-            connectable = engine_from_config(
-                config.get_section(config.config_ini_section),
-                prefix="sqlalchemy.",
-                poolclass=pool.NullPool,
-            )
-            with connectable.connect() as connection:
-                context.configure(connection=connection, target_metadata=target_metadata)
-                with context.begin_transaction():
-                    context.run_migrations()
-
-        if context.is_offline_mode():
-            run_migrations_offline()
-        else:
-            run_migrations_online()
-        ```
-
-3. **Générer une migration** pour créer la table `houses` :
-    ```bash
-    alembic revision --autogenerate -m "create houses table"
-    ```
-
-4. **Appliquer la migration** :
-    ```bash
-    alembic upgrade head
-    ```
-
-    - Cela créera la table `houses` dans votre base de données PostgreSQL.
-
----
-
-## 7. Lancer l’Application
-
-1. **Démarrer le serveur FastAPI avec Uvicorn** :
-    ```bash
-    uvicorn app.main:app --reload
-    ```
-
-    - **`app.main:app`** : Indique à Uvicorn d'utiliser l'instance `app` définie dans `app/main.py`.
-    - **`--reload`** : Active le rechargement automatique lors de modifications du code (utile en développement).
-
-2. **Vérifier que le serveur fonctionne** :
-    - Ouvrez votre navigateur et accédez à [http://127.0.0.1:8000/docs](http://127.0.0.1:8000/docs)
-    - Vous devriez voir la documentation interactive générée par **FastAPI** (Swagger UI).
-
----
-
-## 8. Tester l’API
-
-Vous pouvez tester l’API directement via la documentation interactive ou en utilisant des outils comme **curl** ou **Postman**.
-
-### 8.1. Créer une Nouvelle Maison (POST /houses)
-
-1. **Endpoint** : `POST /houses`
-2. **Exemple de Payload JSON** :
-    ```json
+Réponse Attendue :
+```json
+{
+  "detail": [
     {
-      "longitude": -122.23,
-      "latitude": 37.88,
-      "housing_median_age": 41,
-      "total_rooms": 880,
-      "total_bedrooms": 129,
-      "population": 322,
-      "households": 126,
-      "median_income": 8.3252,
-      "median_house_value": 452600.0,
-      "ocean_proximity": "NEAR BAY"
-    }
-    ```
-3. **Réponse Attendue** :
-    ```json
+      "loc": ["body", "latitude"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
     {
-      "id": 1,
-      "longitude": -122.23,
-      "latitude": 37.88,
-      "housing_median_age": 41,
-      "total_rooms": 880,
-      "total_bedrooms": 129,
-      "population": 322,
-      "households": 126,
-      "median_income": 8.3252,
-      "median_house_value": 452600.0,
-      "ocean_proximity": "NEAR BAY"
+      "loc": ["body", "housing_median_age"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "total_rooms"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "total_bedrooms"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "population"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "households"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "median_income"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "median_house_value"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    },
+    {
+      "loc": ["body", "ocean_proximity"],
+      "msg": "field required",
+      "type": "value_error.missing"
     }
-    ```
+  ]
+}
+```
 
-### 8.2. Récupérer Toutes les Maisons (GET /houses)
+### 3.4. Afficher les Logs Docker
 
-1. **Endpoint** : `GET /houses`
-2. **Réponse Attendue** :
-    ```json
-    [
-      {
-        "id": 1,
-        "longitude": -122.23,
-        "latitude": 37.88,
-        "housing_median_age": 41,
-        "total_rooms": 880,
-        "total_bedrooms": 129,
-        "population": 322,
-        "households": 126,
-        "median_income": 8.3252,
-        "median_house_value": 452600.0,
-        "ocean_proximity": "NEAR BAY"
-      },
-      ...
-    ]
-    ```
+Pour afficher les logs et surveiller le comportement de l'API et de la base de données, utilisez :
+```bash
+docker-compose logs -f
+```
 
----
-## 9. Utiliser Docker
+## 4. Notes Importantes
 
-- **Construire et Lancer les Conteneurs Docker** :
-    - Assurez-vous d’avoir installé Docker et Docker Compose sur votre machine.
-    - Pour construire et lancer les conteneurs :
-        ```bash
-        docker-compose up --build
-        ```
-    - Pour lancer les conteneurs en arrière-plan (mode détaché) :
-        ```bash
-        docker-compose up -d
-        ```
+### Port par Défaut
+L'API écoute sur le port 8001. Si vous modifiez le port dans le fichier docker-compose.yml, mettez à jour vos requêtes en conséquence.
 
-- **Arrêter les Conteneurs Docker** :
-    - Pour arrêter et supprimer les conteneurs actifs :
-        ```bash
-        docker-compose down
-        ```
+### Fichier .env (Facultatif)
+Si besoin, configurez un fichier .env pour personnaliser les paramètres (base de données, API, etc.).
 
-- **Vérifier les Logs des Conteneurs Docker** :
-    - Pour suivre les logs du conteneur `web` :
-        ```bash
-        docker-compose logs -f web
-        ```
-    - Pour suivre les logs du conteneur de la base de données `db` :
-        ```bash
-        docker-compose logs -f db
-        ```
+### Réinitialiser les Conteneurs
+Si vous rencontrez des problèmes, réinitialisez les conteneurs et les volumes :
+```bash
+docker-compose down --volumes
+docker-compose up --build
+```
 
-- **Accéder à l'API via Docker** :
-    - Une fois les conteneurs lancés, accédez à la documentation interactive de l'API via :
-        ```
-        http://localhost:8000/docs
-        ```
+### Sécurité
+Ne divulguez jamais vos informations sensibles telles que les mots de passe dans votre dépôt GitHub. Assurez-vous que le fichier .env est bien inclus dans .gitignore.
+
+### Mises à Jour des Dépendances
+Régulièrement, mettez à jour vos dépendances avec Poetry pour bénéficier des dernières fonctionnalités et correctifs de sécurité :
+```bash
+poetry update
+```
+
+### Optimisation Docker
+- Utilisez le cache Docker efficacement en structurant votre Dockerfile de manière à minimiser les rebuilds inutiles
+- Évitez de copier tout le répertoire du projet avant d'installer les dépendances, cela permet de profiter du cache Docker pour les dépendances qui ne changent pas souvent
+
+## 5. Licence
+
+Ce projet est sous licence MIT. Voir le fichier LICENSE pour plus de détails.
 
 ---
 
-
-
-## 10. Licence
-
-Ce projet est sous licence **MIT**. Voir le fichier [LICENSE](LICENSE) pour plus de détails.
-
----
-
-**Merci d’avoir utilisé Housing API !**  
-N’hésitez pas à ouvrir des issues ou des pull requests si vous avez des suggestions ou des améliorations à proposer.
-
+Merci d'avoir utilisé Housing API ! 😊  
+N'hésitez pas à ouvrir des issues ou des pull requests si vous avez des suggestions ou des améliorations à proposer.
