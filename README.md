@@ -45,7 +45,7 @@
    docker-compose down
    ```
 
-## 3. Tester l'API avec cURL
+## 3. Tester l'API avec cURL (cette partie concerne seulement housing-api et pas le model de prediction)
 
 ### 3.1. Récupérer Toutes les Maisons (`GET /houses`)
 
