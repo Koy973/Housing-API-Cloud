@@ -1,0 +1,16 @@
+version: "3.8"
+
+services:
+  housing-model:
+    build: .
+    container_name: housing_model_container
+    # Publier le port 8001 externe => 8001 interne
+    ports:
+      - "8001:8001"
+    # La ligne de commande lance d'abord le script d'entraînement,
+    # puis démarre l'API (uvicorn).
+    command: >
+      sh -c "
+      python train_model.py &&
+      uvicorn predict_api:app --host 0.0.0.0 --port 8001
+      "
