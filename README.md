@@ -15,7 +15,7 @@
 1. **Cloner le dépôt GitHub** :
    ```bash
    git clone https://github.com/votre-utilisateur/housing-firstname-lastname.git
-   cd housing-firstname-lastname/housing-api
+   cd le project
    ```
 
 2. **Vérifier que les fichiers nécessaires sont présents** :  
